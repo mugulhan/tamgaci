@@ -69,7 +69,7 @@ $has_any_vehicle = false;
             <div class="space-y-8">
                 <span class="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-blue-700">
                     <span data-icon="mdi:car-multiple"></span>
-                    <?php esc_html_e( 'Tamgacı Araç Veritabanı', 'tamgaci' ); ?>
+                    <?php esc_html_e( 'Karşılaştırma Motoru', 'tamgaci' ); ?>
                 </span>
                 <div class="space-y-4">
                     <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
@@ -80,7 +80,7 @@ $has_any_vehicle = false;
                         if ( $site_tagline ) {
                             echo esc_html( $site_tagline );
                         } else {
-                            esc_html_e( 'Elektrikli, hibrit ve geleneksel araçları tek noktadan inceleyin; fiyat, donanım ve gövde tiplerini anında karşılaştırın.', 'tamgaci' );
+                            esc_html_e( 'Teknik özellikleri, performans değerlerini ve donanım paketlerini detaylı karşılaştırın, bilinçli seçim yapın.', 'tamgaci' );
                         }
                         ?>
                     </p>

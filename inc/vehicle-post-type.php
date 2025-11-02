@@ -2491,3 +2491,85 @@ function tamgaci_filter_electric_vehicle_archive( $query ) {
     }
 }
 add_action( 'pre_get_posts', 'tamgaci_filter_electric_vehicle_archive' );
+
+/**
+ * Add custom columns to vehicle_comparison admin list
+ */
+function tamgaci_comparison_admin_columns( $columns ) {
+    $new_columns = [];
+
+    // Keep checkbox and title
+    if ( isset( $columns['cb'] ) ) {
+        $new_columns['cb'] = $columns['cb'];
+    }
+    if ( isset( $columns['title'] ) ) {
+        $new_columns['title'] = $columns['title'];
+    }
+
+    // Add custom columns
+    $new_columns['comparison_types'] = __( 'Karşılaştırma Türü', 'tamgaci' );
+    $new_columns['comparison_items'] = __( 'Karşılaştırılan Öğeler', 'tamgaci' );
+
+    // Keep date
+    if ( isset( $columns['date'] ) ) {
+        $new_columns['date'] = $columns['date'];
+    }
+
+    return $new_columns;
+}
+add_filter( 'manage_vehicle_comparison_posts_columns', 'tamgaci_comparison_admin_columns' );
+
+/**
+ * Populate custom columns in vehicle_comparison admin list
+ */
+function tamgaci_comparison_admin_column_content( $column, $post_id ) {
+    if ( $column === 'comparison_types' ) {
+        $vehicle_ids = get_post_meta( $post_id, 'tamgaci_comparison_vehicle_ids', true );
+
+        if ( ! is_array( $vehicle_ids ) || empty( $vehicle_ids ) ) {
+            echo '<span style="color: #999;">—</span>';
+            return;
+        }
+
+        // Collect unique post types
+        $post_types = [];
+        foreach ( $vehicle_ids as $vehicle_id ) {
+            $post_type = get_post_type( $vehicle_id );
+            if ( $post_type && ! in_array( $post_type, $post_types, true ) ) {
+                $post_types[] = $post_type;
+            }
+        }
+
+        // Display post type labels with icons
+        $labels = [];
+        $type_icons = [
+            'electric_vehicle'   => '⚡',
+            'combustion_vehicle' => '⛽',
+            'motorcycle'         => '🏍️',
+        ];
+
+        foreach ( $post_types as $post_type ) {
+            $post_type_obj = get_post_type_object( $post_type );
+            if ( $post_type_obj ) {
+                $icon = isset( $type_icons[ $post_type ] ) ? $type_icons[ $post_type ] . ' ' : '';
+                $labels[] = '<span style="display: inline-block; padding: 4px 8px; background: #f0f0f1; border-radius: 4px; font-size: 12px; white-space: nowrap;">'
+                    . esc_html( $icon . $post_type_obj->labels->singular_name )
+                    . '</span>';
+            }
+        }
+
+        echo implode( ' ', $labels );
+    }
+
+    if ( $column === 'comparison_items' ) {
+        $vehicle_ids = get_post_meta( $post_id, 'tamgaci_comparison_vehicle_ids', true );
+
+        if ( ! is_array( $vehicle_ids ) || empty( $vehicle_ids ) ) {
+            echo '<span style="color: #999;">—</span>';
+            return;
+        }
+
+        echo '<strong>' . count( $vehicle_ids ) . '</strong> ' . esc_html__( 'öğe', 'tamgaci' );
+    }
+}
+add_action( 'manage_vehicle_comparison_posts_custom_column', 'tamgaci_comparison_admin_column_content', 10, 2 );

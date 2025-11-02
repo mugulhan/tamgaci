@@ -3,7 +3,7 @@
  * Tamgaci theme bootstrap.
  */
 
-define( 'TAMGACI_VERSION', '0.10.4' );
+define( 'TAMGACI_VERSION', '0.10.5' );
 define( 'TAMGACI_THEME_PATH', __DIR__ );
 
 require_once TAMGACI_THEME_PATH . '/inc/vehicle-post-type.php';
@@ -112,4 +112,38 @@ add_action( 'admin_enqueue_scripts', function ( $hook ) {
             TAMGACI_VERSION
         );
     }
+} );
+
+// Add custom rewrite rules for comparison category pages
+add_action( 'init', function () {
+    add_rewrite_rule(
+        '^karsilastirma/(electric_vehicle|combustion_vehicle|motorcycle)/?$',
+        'index.php?comparison_category=$matches[1]',
+        'top'
+    );
+} );
+
+// Flush rewrite rules on theme activation
+add_action( 'after_switch_theme', function () {
+    flush_rewrite_rules();
+} );
+
+// Add custom query vars
+add_filter( 'query_vars', function ( $vars ) {
+    $vars[] = 'comparison_category';
+    return $vars;
+} );
+
+// Load custom template for comparison category pages
+add_filter( 'template_include', function ( $template ) {
+    $comparison_category = get_query_var( 'comparison_category' );
+
+    if ( $comparison_category ) {
+        $new_template = locate_template( [ 'archive-comparison-category.php' ] );
+        if ( $new_template ) {
+            return $new_template;
+        }
+    }
+
+    return $template;
 } );

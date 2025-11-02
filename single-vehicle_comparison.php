@@ -23,6 +23,19 @@ while ( have_posts() ) {
     }
     ?>
     <section class="container mx-auto px-4 py-16 space-y-12">
+        <!-- Breadcrumb -->
+        <nav class="flex items-center gap-2 text-sm text-slate-600" aria-label="<?php esc_attr_e( 'Breadcrumb', 'tamgaci' ); ?>">
+            <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="hover:text-slate-900 transition">
+                <?php esc_html_e( 'Ana Sayfa', 'tamgaci' ); ?>
+            </a>
+            <span aria-hidden="true">/</span>
+            <a href="<?php echo esc_url( get_post_type_archive_link( 'vehicle_comparison' ) ); ?>" class="hover:text-slate-900 transition">
+                <?php esc_html_e( 'Karşılaştırmalar', 'tamgaci' ); ?>
+            </a>
+            <span aria-hidden="true">/</span>
+            <span class="text-slate-900 font-medium" aria-current="page"><?php the_title(); ?></span>
+        </nav>
+
         <header class="text-center">
             <h1 class="text-3xl font-semibold text-slate-900 sm:text-4xl"><?php the_title(); ?></h1>
             <?php if ( has_excerpt() ) : ?>

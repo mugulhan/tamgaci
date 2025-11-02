@@ -54,6 +54,23 @@ if ( $custom_logo_id ) {
     );
 }
 
+// Fallback: If no logo, try to use site icon
+$site_icon_id = get_option( 'site_icon' );
+if ( ! $logo_markup && $site_icon_id ) {
+    $logo_markup = wp_get_attachment_image(
+        $site_icon_id,
+        'full',
+        false,
+        [
+            'class'    => 'h-10 w-auto max-h-10 object-contain',
+            'loading'  => 'eager',
+            'fetchpriority' => 'high',
+            'alt'      => $site_name ?: $site_description,
+            'decoding' => 'async',
+        ]
+    );
+}
+
 $brand_initial = '';
 if ( $site_name ) {
     $brand_initial = function_exists( 'mb_substr' )
