@@ -3,7 +3,7 @@
  * Tamgaci theme bootstrap.
  */
 
-define( 'TAMGACI_VERSION', '0.10.3' );
+define( 'TAMGACI_VERSION', '0.10.4' );
 define( 'TAMGACI_THEME_PATH', __DIR__ );
 
 require_once TAMGACI_THEME_PATH . '/inc/vehicle-post-type.php';
@@ -23,10 +23,30 @@ add_action( 'after_setup_theme', function () {
         'flex-height' => true,
         'flex-width'  => true,
     ] );
+
+    // Site Icon (Favicon) support
+    add_theme_support( 'site-icon' );
+
     register_nav_menus( [
         'primary' => __( 'Ana Menü', 'tamgaci' ),
     ] );
 } );
+
+// Remove WordPress default site icon
+remove_action( 'wp_head', 'wp_site_icon', 99 );
+
+// Add custom favicon if no site icon is set
+add_action( 'wp_head', function () {
+    $site_icon_id = get_option( 'site_icon' );
+    $custom_logo_id = get_theme_mod( 'custom_logo' );
+
+    // Only add custom favicon if no site icon or custom logo is set
+    if ( ! $site_icon_id && ! $custom_logo_id ) {
+        $favicon_url = get_template_directory_uri() . '/assets/images/favicon.svg';
+        echo '<link rel="icon" type="image/svg+xml" href="' . esc_url( $favicon_url ) . '" />' . "\n";
+        echo '<link rel="apple-touch-icon" href="' . esc_url( $favicon_url ) . '" />' . "\n";
+    }
+}, 99 );
 
 add_action( 'wp_enqueue_scripts', function () {
     $theme_dir = get_template_directory();
