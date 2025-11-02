@@ -3,7 +3,7 @@
  * Tamgaci theme bootstrap.
  */
 
-define( 'TAMGACI_VERSION', '0.7.0' );
+define( 'TAMGACI_VERSION', '0.8.0' );
 define( 'TAMGACI_THEME_PATH', __DIR__ );
 
 require_once TAMGACI_THEME_PATH . '/inc/vehicle-post-type.php';
