@@ -17,7 +17,6 @@ class Tamgaci_GitHub_Updater {
         $this->version = $theme->get( 'Version' );
 
         add_filter( 'pre_set_site_transient_update_themes', array( $this, 'check_update' ) );
-        add_filter( 'upgrader_source_selection', array( $this, 'fix_update_folder' ), 10, 3 );
     }
 
     /**
@@ -66,11 +65,23 @@ class Tamgaci_GitHub_Updater {
 
         // Compare versions
         if ( version_compare( $this->version, $github_version, '<' ) ) {
+            // Find the deployment ZIP asset
+            $package_url = $this->github_response->zipball_url;
+
+            if ( ! empty( $this->github_response->assets ) ) {
+                foreach ( $this->github_response->assets as $asset ) {
+                    if ( strpos( $asset->name, 'tamgaci-v' ) === 0 && strpos( $asset->name, '.zip' ) !== false ) {
+                        $package_url = $asset->browser_download_url;
+                        break;
+                    }
+                }
+            }
+
             $theme_data = array(
                 'theme'       => $this->theme_slug,
                 'new_version' => $github_version,
                 'url'         => $this->github_response->html_url,
-                'package'     => $this->github_response->zipball_url,
+                'package'     => $package_url,
             );
 
             $transient->response[ $this->theme_slug ] = $theme_data;
