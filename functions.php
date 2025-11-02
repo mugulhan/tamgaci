@@ -3,11 +3,15 @@
  * Tamgaci theme bootstrap.
  */
 
-define( 'TAMGACI_VERSION', '0.9.0' );
+define( 'TAMGACI_VERSION', '0.10.0' );
 define( 'TAMGACI_THEME_PATH', __DIR__ );
 
 require_once TAMGACI_THEME_PATH . '/inc/vehicle-post-type.php';
 require_once TAMGACI_THEME_PATH . '/inc/theme-updater.php';
+require_once TAMGACI_THEME_PATH . '/inc/sitemap.php';
+
+// Disable WordPress default sitemap
+add_filter( 'wp_sitemaps_enabled', '__return_false' );
 
 add_action( 'after_setup_theme', function () {
     add_theme_support( 'title-tag' );
