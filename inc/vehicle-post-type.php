@@ -1451,8 +1451,8 @@ function tamgaci_build_vehicle_comparisons( $vehicle_id, $post = null, $update =
         }
     }
 }
-// Disable automatic comparison building to prevent performance issues on new post screen
-// add_action( 'save_post', 'tamgaci_build_vehicle_comparisons', 90 );
+// Enable automatic comparison building when a vehicle is published
+add_action( 'save_post', 'tamgaci_build_vehicle_comparisons', 90, 3 );
 
 function tamgaci_seed_all_vehicle_comparisons() {
     if ( ! current_user_can( 'manage_options' ) ) {
@@ -2573,3 +2573,95 @@ function tamgaci_comparison_admin_column_content( $column, $post_id ) {
     }
 }
 add_action( 'manage_vehicle_comparison_posts_custom_column', 'tamgaci_comparison_admin_column_content', 10, 2 );
+
+/**
+ * Add "Build Comparisons" action link to vehicle post rows
+ */
+function tamgaci_vehicle_row_actions( $actions, $post ) {
+    $vehicle_types = tamgaci_get_vehicle_post_types();
+
+    if ( ! in_array( $post->post_type, $vehicle_types, true ) ) {
+        return $actions;
+    }
+
+    if ( $post->post_status !== 'publish' ) {
+        return $actions;
+    }
+
+    $url = wp_nonce_url(
+        admin_url( 'admin-post.php?action=tamgaci_build_single_comparison&post_id=' . $post->ID ),
+        'tamgaci_build_comparison_' . $post->ID
+    );
+
+    $actions['build_comparisons'] = sprintf(
+        '<a href="%s" title="%s">%s</a>',
+        esc_url( $url ),
+        esc_attr__( 'Bu araç için karşılaştırmalar oluştur', 'tamgaci' ),
+        esc_html__( 'Karşılaştırma Oluştur', 'tamgaci' )
+    );
+
+    return $actions;
+}
+add_filter( 'post_row_actions', 'tamgaci_vehicle_row_actions', 10, 2 );
+
+/**
+ * Handle single vehicle comparison building
+ */
+function tamgaci_build_single_comparison_handler() {
+    if ( ! isset( $_GET['post_id'] ) ) {
+        wp_die( esc_html__( 'Geçersiz istek.', 'tamgaci' ) );
+    }
+
+    $post_id = absint( $_GET['post_id'] );
+
+    check_admin_referer( 'tamgaci_build_comparison_' . $post_id );
+
+    if ( ! current_user_can( 'edit_post', $post_id ) ) {
+        wp_die( esc_html__( 'Bu işlem için yetkiniz yok.', 'tamgaci' ) );
+    }
+
+    $post = get_post( $post_id );
+    $vehicle_types = tamgaci_get_vehicle_post_types();
+
+    if ( ! $post || ! in_array( $post->post_type, $vehicle_types, true ) ) {
+        wp_die( esc_html__( 'Geçersiz araç.', 'tamgaci' ) );
+    }
+
+    // Build comparisons for this vehicle
+    tamgaci_build_vehicle_comparisons( $post_id );
+
+    // Redirect back with success message
+    $redirect_url = add_query_arg(
+        [
+            'post_type' => $post->post_type,
+            'tamgaci_comparison_built' => '1',
+            'vehicle_id' => $post_id,
+        ],
+        admin_url( 'edit.php' )
+    );
+
+    wp_safe_redirect( $redirect_url );
+    exit;
+}
+add_action( 'admin_post_tamgaci_build_single_comparison', 'tamgaci_build_single_comparison_handler' );
+
+/**
+ * Show admin notice after building comparisons
+ */
+function tamgaci_comparison_built_notice() {
+    if ( ! isset( $_GET['tamgaci_comparison_built'] ) || ! isset( $_GET['vehicle_id'] ) ) {
+        return;
+    }
+
+    $vehicle_id = absint( $_GET['vehicle_id'] );
+    $vehicle_title = get_the_title( $vehicle_id );
+
+    printf(
+        '<div class="notice notice-success is-dismissible"><p>%s</p></div>',
+        sprintf(
+            esc_html__( '"%s" için karşılaştırmalar oluşturuldu.', 'tamgaci' ),
+            esc_html( $vehicle_title )
+        )
+    );
+}
+add_action( 'admin_notices', 'tamgaci_comparison_built_notice' );
