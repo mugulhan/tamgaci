@@ -502,14 +502,13 @@ function tamgaci_vehicle_meta_schema( $post_type ) {
                 'unit'        => 'L/100 km',
             ],
             'tamgaci_vehicle_fuel_consumption' => [
-                'label'       => __( 'Ortalama Tüketim (L/100 km)', 'tamgaci' ),
+                'label'       => __( 'WLTP Birleşik Tüketim (L/100 km)', 'tamgaci' ),
                 'type'        => 'number',
                 'placeholder' => '4.2',
                 'sanitize'    => 'tamgaci_sanitize_decimal',
                 'step'        => '0.1',
                 'unit'        => 'L/100 km',
-                'description' => __( 'Şehir içi ve şehir dışı değerleri girerseniz otomatik hesaplanır.', 'tamgaci' ),
-                'calculated'  => true,
+                'description' => __( 'Şehir içi + şehir dışı girerseniz otomatik hesaplanır. Ya da bu değeri girerseniz şehir içi/dışı tahmini hesaplanır.', 'tamgaci' ),
             ],
             'tamgaci_vehicle_fuel_tank_capacity' => [
                 'label'       => __( 'Yakıt Deposu Kapasitesi (L)', 'tamgaci' ),
@@ -738,14 +737,13 @@ function tamgaci_vehicle_meta_schema( $post_type ) {
                 'unit'        => 'L/100 km',
             ],
             'tamgaci_vehicle_fuel_consumption' => [
-                'label'       => __( 'Ortalama Tüketim (L/100 km)', 'tamgaci' ),
+                'label'       => __( 'WLTP Birleşik Tüketim (L/100 km)', 'tamgaci' ),
                 'type'        => 'number',
                 'placeholder' => '5.8',
                 'sanitize'    => 'tamgaci_sanitize_decimal',
                 'step'        => '0.1',
                 'unit'        => 'L/100 km',
-                'description' => __( 'Şehir içi ve şehir dışı değerleri girerseniz otomatik hesaplanır.', 'tamgaci' ),
-                'calculated'  => true,
+                'description' => __( 'Şehir içi + şehir dışı girerseniz otomatik hesaplanır. Ya da bu değeri girerseniz şehir içi/dışı tahmini hesaplanır.', 'tamgaci' ),
             ],
             'tamgaci_vehicle_fuel_tank_capacity' => [
                 'label'       => __( 'Yakıt Deposu Kapasitesi (L)', 'tamgaci' ),
@@ -887,15 +885,13 @@ function tamgaci_render_vehicle_meta_box( $post ) {
         } else {
             $input_type = ( 'number' === $config['type'] ) ? 'number' : 'text';
             $step_attr  = ( 'number' === $config['type'] && isset( $config['step'] ) ) ? sprintf( ' step="%s"', esc_attr( $config['step'] ) ) : '';
-            $readonly_attr = ( isset( $config['calculated'] ) && $config['calculated'] ) ? ' readonly style="background-color: #f0f0f0; cursor: not-allowed;"' : '';
             printf(
-                '<input type="%4$s" name="%1$s" value="%2$s" placeholder="%3$s"%5$s%6$s />',
+                '<input type="%4$s" name="%1$s" value="%2$s" placeholder="%3$s"%5$s />',
                 esc_attr( $key ),
                 esc_attr( $value ),
                 esc_attr( $placeholder ),
                 esc_attr( $input_type ),
-                $step_attr,
-                $readonly_attr
+                $step_attr
             );
         }
 
@@ -936,11 +932,6 @@ function tamgaci_save_vehicle_meta( $post_id, $post, $update ) {
     $saved_values = [];
 
     foreach ( $schema as $key => $config ) {
-        // Skip calculated fields initially
-        if ( isset( $config['calculated'] ) && $config['calculated'] ) {
-            continue;
-        }
-
         $raw_value = isset( $_POST[ $key ] ) ? wp_unslash( $_POST[ $key ] ) : '';
         $sanitize  = $config['sanitize'];
 
@@ -954,18 +945,25 @@ function tamgaci_save_vehicle_meta( $post_id, $post, $update ) {
         $saved_values[ $key ] = $value;
     }
 
-    // Calculate average fuel consumption if both city and highway values are present
-    if ( isset( $saved_values['tamgaci_vehicle_fuel_consumption_city'] ) &&
-         isset( $saved_values['tamgaci_vehicle_fuel_consumption_highway'] ) ) {
+    // Fuel consumption bi-directional calculation
+    $city = isset( $saved_values['tamgaci_vehicle_fuel_consumption_city'] ) ? (float) $saved_values['tamgaci_vehicle_fuel_consumption_city'] : 0;
+    $highway = isset( $saved_values['tamgaci_vehicle_fuel_consumption_highway'] ) ? (float) $saved_values['tamgaci_vehicle_fuel_consumption_highway'] : 0;
+    $average = isset( $saved_values['tamgaci_vehicle_fuel_consumption'] ) ? (float) $saved_values['tamgaci_vehicle_fuel_consumption'] : 0;
 
-        $city = (float) $saved_values['tamgaci_vehicle_fuel_consumption_city'];
-        $highway = (float) $saved_values['tamgaci_vehicle_fuel_consumption_highway'];
-
-        if ( $city > 0 && $highway > 0 ) {
-            // Calculate weighted average (55% city, 45% highway as per WLTP)
-            $average = round( ( $city * 0.55 + $highway * 0.45 ), 1 );
-            update_post_meta( $post_id, 'tamgaci_vehicle_fuel_consumption', $average );
-        }
+    // If city and highway are provided, calculate average
+    if ( $city > 0 && $highway > 0 ) {
+        // Calculate weighted average (55% city, 45% highway as per WLTP)
+        $calculated_average = round( ( $city * 0.55 + $highway * 0.45 ), 1 );
+        update_post_meta( $post_id, 'tamgaci_vehicle_fuel_consumption', $calculated_average );
+    }
+    // If average is provided but city/highway are empty, estimate them
+    elseif ( $average > 0 && $city == 0 && $highway == 0 ) {
+        // Reverse calculation: estimate city and highway from average
+        // City is typically 15% higher than average, highway 10% lower
+        $estimated_city = round( $average * 1.15, 1 );
+        $estimated_highway = round( $average * 0.90, 1 );
+        update_post_meta( $post_id, 'tamgaci_vehicle_fuel_consumption_city', $estimated_city );
+        update_post_meta( $post_id, 'tamgaci_vehicle_fuel_consumption_highway', $estimated_highway );
     }
 }
 add_action( 'save_post', 'tamgaci_save_vehicle_meta', 10, 3 );
