@@ -704,6 +704,7 @@ function tamgaci_vehicle_meta_schema( $post_type ) {
                 'sanitize'    => 'tamgaci_sanitize_decimal',
                 'step'        => '0.1',
                 'unit'        => 'kW',
+                'description' => __( 'Beygir gücü girerseniz otomatik hesaplanır. Ya da bu değeri girerseniz beygir gücü tahmini hesaplanır. (1 kW = 1.35962 PS)', 'tamgaci' ),
             ],
             'tamgaci_vehicle_horsepower' => [
                 'label'       => __( 'Beygir Gücü (PS)', 'tamgaci' ),
@@ -712,6 +713,7 @@ function tamgaci_vehicle_meta_schema( $post_type ) {
                 'sanitize'    => 'tamgaci_sanitize_decimal',
                 'step'        => '1',
                 'unit'        => 'PS',
+                'description' => __( 'Motor gücü girerseniz otomatik hesaplanır. Ya da bu değeri girerseniz motor gücü tahmini hesaplanır. (1 kW = 1.35962 PS)', 'tamgaci' ),
             ],
             'tamgaci_vehicle_torque' => [
                 'label'       => __( 'Azami Tork (Nm)', 'tamgaci' ),
@@ -965,6 +967,22 @@ function tamgaci_save_vehicle_meta( $post_id, $post, $update ) {
         $estimated_highway = round( $average * 0.90, 1 );
         update_post_meta( $post_id, 'tamgaci_vehicle_fuel_consumption_city', $estimated_city );
         update_post_meta( $post_id, 'tamgaci_vehicle_fuel_consumption_highway', $estimated_highway );
+    }
+
+    // Power bi-directional calculation (kW ↔ PS)
+    // Conversion factor: 1 kW = 1.35962 PS (DIN standard)
+    $power_kw = isset( $saved_values['tamgaci_vehicle_power'] ) ? (float) $saved_values['tamgaci_vehicle_power'] : 0;
+    $power_ps = isset( $saved_values['tamgaci_vehicle_horsepower'] ) ? (float) $saved_values['tamgaci_vehicle_horsepower'] : 0;
+
+    // If kW is provided, calculate PS
+    if ( $power_kw > 0 && $power_ps == 0 ) {
+        $calculated_ps = round( $power_kw * 1.35962 );
+        update_post_meta( $post_id, 'tamgaci_vehicle_horsepower', $calculated_ps );
+    }
+    // If PS is provided, calculate kW
+    elseif ( $power_ps > 0 && $power_kw == 0 ) {
+        $calculated_kw = round( $power_ps / 1.35962, 1 );
+        update_post_meta( $post_id, 'tamgaci_vehicle_power', $calculated_kw );
     }
 }
 add_action( 'save_post', 'tamgaci_save_vehicle_meta', 10, 3 );
