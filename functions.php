@@ -7,6 +7,7 @@ define( 'TAMGACI_VERSION', '0.7.0' );
 define( 'TAMGACI_THEME_PATH', __DIR__ );
 
 require_once TAMGACI_THEME_PATH . '/inc/vehicle-post-type.php';
+require_once TAMGACI_THEME_PATH . '/inc/theme-updater.php';
 
 add_action( 'after_setup_theme', function () {
     add_theme_support( 'title-tag' );
