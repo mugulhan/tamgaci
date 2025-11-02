@@ -17,6 +17,7 @@ class Tamgaci_GitHub_Updater {
         $this->version = $theme->get( 'Version' );
 
         add_filter( 'pre_set_site_transient_update_themes', array( $this, 'check_update' ) );
+        add_filter( 'upgrader_source_selection', array( $this, 'fix_update_folder' ), 10, 3 );
     }
 
     /**
