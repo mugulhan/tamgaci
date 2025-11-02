@@ -676,6 +676,7 @@ function tamgaci_vehicle_meta_schema( $post_type ) {
                     'benzin'  => __( 'Benzin', 'tamgaci' ),
                     'dizel'   => __( 'Dizel', 'tamgaci' ),
                     'lpg'     => __( 'LPG', 'tamgaci' ),
+                    'mhev'    => __( 'Mild Hybrid (mHEV)', 'tamgaci' ),
                     'hybrid'  => __( 'Hybrid', 'tamgaci' ),
                     'phev'    => __( 'Plug-in Hybrid (PHEV)', 'tamgaci' ),
                 ],
