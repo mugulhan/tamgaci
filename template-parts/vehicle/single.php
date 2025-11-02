@@ -491,14 +491,16 @@ $compare_max = 4;
                             <img class="h-32 w-full rounded-lg object-cover" src="<?php echo esc_url( $related['image'] ); ?>" alt="<?php echo esc_attr( $related['title'] ); ?>" />
                         <?php endif; ?>
                         <dl class="grid grid-cols-1 gap-2 text-xs text-slate-600">
-                            <?php if ( ! empty( $related['key_specs'] ) ) : ?>
-                                <?php foreach ( array_slice( $related['key_specs'], 0, 3 ) as $spec ) : ?>
-                                    <div class="flex justify-between">
-                                        <dt><?php echo esc_html( $spec['label'] ); ?>:</dt>
-                                        <dd class="font-medium text-slate-900"><?php echo esc_html( $spec['value'] ); ?></dd>
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
+                            <?php
+                            $specs_to_show = ! empty( $related['key_specs'] ) ? $related['key_specs'] : ( ! empty( $related['specs'] ) ? $related['specs'] : [] );
+                            if ( ! empty( $specs_to_show ) ) :
+                                foreach ( array_slice( $specs_to_show, 0, 3 ) as $spec ) :
+                            ?>
+                                <div>
+                                    <dt class="font-semibold text-slate-500"><?php echo esc_html( $spec['label'] ); ?></dt>
+                                    <dd class="text-slate-800"><?php echo esc_html( $spec['value'] ); ?></dd>
+                                </div>
+                            <?php endforeach; endif; ?>
                         </dl>
                         <a class="mt-auto inline-flex items-center justify-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-900 transition hover:bg-slate-200" href="<?php echo esc_url( $related['url'] ); ?>">
                             <?php esc_html_e( 'Detaylar', 'tamgaci' ); ?>

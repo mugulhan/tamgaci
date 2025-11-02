@@ -35,7 +35,9 @@ $term_chip_class = 'inline-flex items-center gap-1 rounded-full border border-sl
 <article <?php post_class( $card_class, $post_id ); ?> data-vehicle-id="<?php echo esc_attr( $post_id ); ?>">
     <?php if ( has_post_thumbnail( $post_id ) ) : ?>
         <a class="block" href="<?php echo esc_url( get_permalink( $post_id ) ); ?>">
-            <?php echo get_the_post_thumbnail( $post_id, 'large', [ 'class' => 'h-48 w-full object-cover transition group-hover:scale-[1.02]' ] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+            <div class="h-48 w-full overflow-hidden bg-slate-50">
+                <?php echo get_the_post_thumbnail( $post_id, 'large', [ 'class' => 'h-full w-full object-cover transition group-hover:scale-[1.02]' ] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+            </div>
         </a>
     <?php endif; ?>
     <div class="flex flex-1 flex-col gap-4 p-6">

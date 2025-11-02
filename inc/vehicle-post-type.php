@@ -1912,6 +1912,49 @@ function tamgaci_calculate_ac_charging_time( $battery_capacity, $charging_power 
     return (int) $charging_time_minutes;
 }
 
+/**
+ * Get vehicle icon based on body type
+ *
+ * @param int $post_id Vehicle post ID
+ * @return string Icon name for iconify
+ */
+function tamgaci_get_vehicle_icon_by_body_type( $post_id ) {
+    // Custom icon from meta field has priority
+    $custom_icon = get_post_meta( $post_id, 'tamgaci_vehicle_icon', true );
+    if ( $custom_icon ) {
+        return $custom_icon;
+    }
+
+    // Get body type terms
+    $body_types = wp_get_post_terms( $post_id, 'vehicle_body_type', [ 'fields' => 'names' ] );
+
+    if ( is_wp_error( $body_types ) || empty( $body_types ) ) {
+        return 'mdi:car-side';
+    }
+
+    // Icon mapping based on body type
+    $icon_map = [
+        'SUV'           => 'mdi:car-estate',
+        'Sedan'         => 'mdi:car-sedan',
+        'Coupe'         => 'mdi:car-sports',
+        'Hatchback'     => 'mdi:car-hatchback',
+        'Wagon'         => 'mdi:car-estate',
+        'Pickup'        => 'mdi:truck',
+        'Van'           => 'mdi:van-utility',
+        'Minivan'       => 'mdi:van-passenger',
+        'Convertible'   => 'mdi:car-convertible',
+        'Crossover'     => 'mdi:car-lifted-pickup',
+        'Sports Car'    => 'mdi:car-sports',
+        'Limousine'     => 'mdi:car-limousine',
+        'Motorcycle'    => 'mdi:motorbike',
+    ];
+
+    // Get first body type and return corresponding icon
+    $first_body_type = $body_types[0];
+
+    return $icon_map[ $first_body_type ] ?? 'mdi:car-side';
+}
+
 function tamgaci_prepare_vehicle_display_data( $post_id ) {
     if ( ! $post_id || ! in_array( get_post_type( $post_id ), tamgaci_get_vehicle_post_types(), true ) ) {
         return null;
@@ -2055,7 +2098,7 @@ function tamgaci_prepare_vehicle_display_data( $post_id ) {
     return [
         'post_type'             => $post_type,
         'is_electric'           => $is_electric,
-        'icon'                  => get_post_meta( $post_id, 'tamgaci_vehicle_icon', true ) ?: 'mdi:car-side',
+        'icon'                  => tamgaci_get_vehicle_icon_by_body_type( $post_id ),
         'year'                  => tamgaci_format_numeric_display( get_post_meta( $post_id, 'tamgaci_vehicle_year', true ) ),
         'model_years'           => tamgaci_get_vehicle_term_names( $post_id, 'vehicle_model_year' ),
         'equipment'             => $equipment_output,
