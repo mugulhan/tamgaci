@@ -1,0 +1,24 @@
+{
+  "name": "tamgaci-theme",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/css/tailwind.css -o ./assets/css/main.css --minify",
+    "build:js": "esbuild src/js/main.js --bundle --outfile=assets/js/main.js --sourcemap --minify --loader:.css=text --tree-shaking=false",
+    "build": "npm run build:css && npm run build:js",
+    "watch:css": "tailwindcss -i ./src/css/tailwind.css -o ./assets/css/main.css --watch",
+    "watch:js": "esbuild src/js/main.js --bundle --outfile=assets/js/main.js --sourcemap --loader:.css=text --tree-shaking=false",
+    "dev": "concurrently \"npm run watch:css\" \"npm run watch:js\""
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^8.2.2",
+    "esbuild": "^0.21.5",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.13"
+  },
+  "dependencies": {
+    "@iconify/iconify": "^3.1.1",
+    "swiper": "^11.1.2"
+  }
+}

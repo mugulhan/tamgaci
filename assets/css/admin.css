@@ -1,0 +1,178 @@
+/* Admin Panel Styles for Vehicle Meta Box */
+
+.tamgaci-meta-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    margin-top: 12px;
+    clear: both;
+}
+
+.tamgaci-meta-grid label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.tamgaci-meta-grid label > span:first-child {
+    font-weight: 600;
+    font-size: 13px;
+    color: #1d2327;
+}
+
+.tamgaci-meta-grid input[type="text"],
+.tamgaci-meta-grid input[type="number"],
+.tamgaci-meta-grid textarea,
+.tamgaci-meta-grid select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    font-size: 13px;
+    line-height: 1.4;
+    background-color: #fff;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+.tamgaci-meta-grid input[type="text"]:focus,
+.tamgaci-meta-grid input[type="number"]:focus,
+.tamgaci-meta-grid textarea:focus,
+.tamgaci-meta-grid select:focus {
+    border-color: #2271b1;
+    outline: none;
+    box-shadow: 0 0 0 1px #2271b1;
+}
+
+.tamgaci-meta-grid textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.tamgaci-meta-grid .description {
+    font-size: 12px;
+    color: #646970;
+    font-style: italic;
+    margin-top: 2px;
+}
+
+/* Meta box styling */
+#tamgaci-vehicle-specs .inside {
+    margin: 0 !important;
+    padding: 12px !important;
+}
+
+#tamgaci-vehicle-specs h2 {
+    padding: 12px;
+    margin: 0;
+    border-bottom: 1px solid #c3c4c7;
+}
+
+/* Fix WordPress 6.8.3 meta box styling */
+.postbox#tamgaci-vehicle-specs {
+    margin-bottom: 20px;
+}
+
+.postbox#tamgaci-vehicle-specs .postbox-header {
+    border-bottom: 1px solid #c3c4c7;
+}
+
+/* Additional fixes for WordPress 6.8.3+ */
+#tamgaci-vehicle-specs .inside > * {
+    max-width: 100% !important;
+}
+
+#tamgaci-vehicle-specs .inside .tamgaci-meta-grid {
+    width: 100% !important;
+}
+
+/* Fix potential float issues */
+.tamgaci-meta-grid::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* Ensure proper box sizing for all meta box elements */
+#tamgaci-vehicle-specs *,
+#tamgaci-vehicle-specs *::before,
+#tamgaci-vehicle-specs *::after {
+    box-sizing: border-box;
+}
+
+/* Responsive adjustments */
+@media (max-width: 782px) {
+    .tamgaci-meta-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Better spacing for post type screens */
+.post-type-combustion_vehicle .tamgaci-meta-grid,
+.post-type-electric_vehicle .tamgaci-meta-grid,
+.post-type-motorcycle .tamgaci-meta-grid {
+    margin-top: 0;
+}
+
+/* Customize Brand Taxonomy Panel */
+.editor-post-taxonomies__hierarchical-terms-list {
+    max-height: 600px !important;
+    min-height: 400px !important;
+    overflow-y: auto !important;
+    padding-right: 8px;
+}
+
+/* Scrollbar styling for brand taxonomy */
+.editor-post-taxonomies__hierarchical-terms-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.editor-post-taxonomies__hierarchical-terms-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.editor-post-taxonomies__hierarchical-terms-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.editor-post-taxonomies__hierarchical-terms-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Make the panel collapsible with better visibility */
+.components-panel__body.is-opened .editor-post-taxonomies__hierarchical-terms-list {
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        max-height: 600px;
+    }
+}
+
+/* Improve checkbox spacing in brand taxonomy */
+.editor-post-taxonomies__hierarchical-terms-choice {
+    margin-bottom: 8px;
+}
+
+/* Add visual hierarchy for nested items */
+.editor-post-taxonomies__hierarchical-terms-subchoices {
+    margin-left: 16px;
+    border-left: 2px solid #e0e0e0;
+    padding-left: 12px;
+    margin-top: 4px;
+}
+
+/* Highlight selected items */
+.editor-post-taxonomies__hierarchical-terms-choice input[type="checkbox"]:checked + svg + label {
+    font-weight: 600;
+    color: #2271b1;
+}
