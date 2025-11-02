@@ -485,6 +485,22 @@ function tamgaci_vehicle_meta_schema( $post_type ) {
                 'step'        => '1',
                 'unit'        => 'Nm',
             ],
+            'tamgaci_vehicle_fuel_consumption_city' => [
+                'label'       => __( 'Şehir İçi Tüketim (L/100 km)', 'tamgaci' ),
+                'type'        => 'number',
+                'placeholder' => '4.8',
+                'sanitize'    => 'tamgaci_sanitize_decimal',
+                'step'        => '0.1',
+                'unit'        => 'L/100 km',
+            ],
+            'tamgaci_vehicle_fuel_consumption_highway' => [
+                'label'       => __( 'Şehir Dışı Tüketim (L/100 km)', 'tamgaci' ),
+                'type'        => 'number',
+                'placeholder' => '3.8',
+                'sanitize'    => 'tamgaci_sanitize_decimal',
+                'step'        => '0.1',
+                'unit'        => 'L/100 km',
+            ],
             'tamgaci_vehicle_fuel_consumption' => [
                 'label'       => __( 'Ortalama Tüketim (L/100 km)', 'tamgaci' ),
                 'type'        => 'number',
@@ -492,6 +508,16 @@ function tamgaci_vehicle_meta_schema( $post_type ) {
                 'sanitize'    => 'tamgaci_sanitize_decimal',
                 'step'        => '0.1',
                 'unit'        => 'L/100 km',
+                'description' => __( 'Şehir içi ve şehir dışı değerleri girerseniz otomatik hesaplanır.', 'tamgaci' ),
+                'calculated'  => true,
+            ],
+            'tamgaci_vehicle_fuel_tank_capacity' => [
+                'label'       => __( 'Yakıt Deposu Kapasitesi (L)', 'tamgaci' ),
+                'type'        => 'number',
+                'placeholder' => '17',
+                'sanitize'    => 'tamgaci_sanitize_decimal',
+                'step'        => '1',
+                'unit'        => 'L',
             ],
             'tamgaci_vehicle_transmission_type' => [
                 'label'       => __( 'Şanzıman Tipi', 'tamgaci' ),
@@ -643,6 +669,34 @@ function tamgaci_vehicle_meta_schema( $post_type ) {
                 'sanitize'    => 'sanitize_text_field',
                 'description' => __( 'Motor tipini ve özelliklerini girin.', 'tamgaci' ),
             ],
+            'tamgaci_vehicle_fuel_type' => [
+                'label'       => __( 'Yakıt Tipi', 'tamgaci' ),
+                'type'        => 'select',
+                'options'     => [
+                    ''        => __( 'Seçiniz...', 'tamgaci' ),
+                    'benzin'  => __( 'Benzin', 'tamgaci' ),
+                    'dizel'   => __( 'Dizel', 'tamgaci' ),
+                    'lpg'     => __( 'LPG', 'tamgaci' ),
+                    'hybrid'  => __( 'Hybrid', 'tamgaci' ),
+                    'phev'    => __( 'Plug-in Hybrid (PHEV)', 'tamgaci' ),
+                ],
+                'sanitize'    => 'sanitize_text_field',
+            ],
+            'tamgaci_vehicle_engine_displacement' => [
+                'label'       => __( 'Silindir Hacmi (cc)', 'tamgaci' ),
+                'type'        => 'number',
+                'placeholder' => '1498',
+                'sanitize'    => 'tamgaci_sanitize_decimal',
+                'step'        => '1',
+                'unit'        => 'cc',
+            ],
+            'tamgaci_vehicle_cylinder_count' => [
+                'label'       => __( 'Silindir Sayısı', 'tamgaci' ),
+                'type'        => 'number',
+                'placeholder' => '4',
+                'sanitize'    => 'tamgaci_sanitize_decimal',
+                'step'        => '1',
+            ],
             'tamgaci_vehicle_power' => [
                 'label'       => __( 'Motor Gücü (kW)', 'tamgaci' ),
                 'type'        => 'number',
@@ -667,6 +721,22 @@ function tamgaci_vehicle_meta_schema( $post_type ) {
                 'step'        => '1',
                 'unit'        => 'Nm',
             ],
+            'tamgaci_vehicle_fuel_consumption_city' => [
+                'label'       => __( 'Şehir İçi Tüketim (L/100 km)', 'tamgaci' ),
+                'type'        => 'number',
+                'placeholder' => '6.5',
+                'sanitize'    => 'tamgaci_sanitize_decimal',
+                'step'        => '0.1',
+                'unit'        => 'L/100 km',
+            ],
+            'tamgaci_vehicle_fuel_consumption_highway' => [
+                'label'       => __( 'Şehir Dışı Tüketim (L/100 km)', 'tamgaci' ),
+                'type'        => 'number',
+                'placeholder' => '4.8',
+                'sanitize'    => 'tamgaci_sanitize_decimal',
+                'step'        => '0.1',
+                'unit'        => 'L/100 km',
+            ],
             'tamgaci_vehicle_fuel_consumption' => [
                 'label'       => __( 'Ortalama Tüketim (L/100 km)', 'tamgaci' ),
                 'type'        => 'number',
@@ -674,6 +744,16 @@ function tamgaci_vehicle_meta_schema( $post_type ) {
                 'sanitize'    => 'tamgaci_sanitize_decimal',
                 'step'        => '0.1',
                 'unit'        => 'L/100 km',
+                'description' => __( 'Şehir içi ve şehir dışı değerleri girerseniz otomatik hesaplanır.', 'tamgaci' ),
+                'calculated'  => true,
+            ],
+            'tamgaci_vehicle_fuel_tank_capacity' => [
+                'label'       => __( 'Yakıt Deposu Kapasitesi (L)', 'tamgaci' ),
+                'type'        => 'number',
+                'placeholder' => '50',
+                'sanitize'    => 'tamgaci_sanitize_decimal',
+                'step'        => '1',
+                'unit'        => 'L',
             ],
             'tamgaci_vehicle_transmission_type' => [
                 'label'       => __( 'Şanzıman Tipi', 'tamgaci' ),
@@ -686,6 +766,13 @@ function tamgaci_vehicle_meta_schema( $post_type ) {
                     'dsg'      => __( 'DSG', 'tamgaci' ),
                 ],
                 'sanitize'    => 'sanitize_text_field',
+            ],
+            'tamgaci_vehicle_gear_count' => [
+                'label'       => __( 'Vites Sayısı', 'tamgaci' ),
+                'type'        => 'number',
+                'placeholder' => '6',
+                'sanitize'    => 'tamgaci_sanitize_decimal',
+                'step'        => '1',
             ],
             'tamgaci_vehicle_acceleration' => [
                 'label'       => __( '0-100 km/h', 'tamgaci' ),
@@ -800,13 +887,15 @@ function tamgaci_render_vehicle_meta_box( $post ) {
         } else {
             $input_type = ( 'number' === $config['type'] ) ? 'number' : 'text';
             $step_attr  = ( 'number' === $config['type'] && isset( $config['step'] ) ) ? sprintf( ' step="%s"', esc_attr( $config['step'] ) ) : '';
+            $readonly_attr = ( isset( $config['calculated'] ) && $config['calculated'] ) ? ' readonly style="background-color: #f0f0f0; cursor: not-allowed;"' : '';
             printf(
-                '<input type="%4$s" name="%1$s" value="%2$s" placeholder="%3$s"%5$s />',
+                '<input type="%4$s" name="%1$s" value="%2$s" placeholder="%3$s"%5$s%6$s />',
                 esc_attr( $key ),
                 esc_attr( $value ),
                 esc_attr( $placeholder ),
                 esc_attr( $input_type ),
-                $step_attr
+                $step_attr,
+                $readonly_attr
             );
         }
 
@@ -843,7 +932,15 @@ function tamgaci_save_vehicle_meta( $post_id, $post, $update ) {
 
     $schema = tamgaci_vehicle_meta_schema( $post->post_type );
 
+    // Store values for potential calculations
+    $saved_values = [];
+
     foreach ( $schema as $key => $config ) {
+        // Skip calculated fields initially
+        if ( isset( $config['calculated'] ) && $config['calculated'] ) {
+            continue;
+        }
+
         $raw_value = isset( $_POST[ $key ] ) ? wp_unslash( $_POST[ $key ] ) : '';
         $sanitize  = $config['sanitize'];
 
@@ -854,6 +951,21 @@ function tamgaci_save_vehicle_meta( $post_id, $post, $update ) {
         }
 
         update_post_meta( $post_id, $key, $value );
+        $saved_values[ $key ] = $value;
+    }
+
+    // Calculate average fuel consumption if both city and highway values are present
+    if ( isset( $saved_values['tamgaci_vehicle_fuel_consumption_city'] ) &&
+         isset( $saved_values['tamgaci_vehicle_fuel_consumption_highway'] ) ) {
+
+        $city = (float) $saved_values['tamgaci_vehicle_fuel_consumption_city'];
+        $highway = (float) $saved_values['tamgaci_vehicle_fuel_consumption_highway'];
+
+        if ( $city > 0 && $highway > 0 ) {
+            // Calculate weighted average (55% city, 45% highway as per WLTP)
+            $average = round( ( $city * 0.55 + $highway * 0.45 ), 1 );
+            update_post_meta( $post_id, 'tamgaci_vehicle_fuel_consumption', $average );
+        }
     }
 }
 add_action( 'save_post', 'tamgaci_save_vehicle_meta', 10, 3 );

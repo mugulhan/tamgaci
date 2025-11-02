@@ -3,7 +3,7 @@
  * Tamgaci theme bootstrap.
  */
 
-define( 'TAMGACI_VERSION', '0.10.7' );
+define( 'TAMGACI_VERSION', '0.10.8' );
 define( 'TAMGACI_THEME_PATH', __DIR__ );
 
 require_once TAMGACI_THEME_PATH . '/inc/vehicle-post-type.php';
@@ -94,7 +94,7 @@ add_action( 'wp_enqueue_scripts', function () {
     }
 } );
 
-// Enqueue admin styles
+// Enqueue admin styles and scripts
 add_action( 'admin_enqueue_scripts', function ( $hook ) {
     // Only load on post edit screens for vehicle post types
     if ( ! in_array( $hook, [ 'post.php', 'post-new.php' ] ) ) {
@@ -110,6 +110,14 @@ add_action( 'admin_enqueue_scripts', function ( $hook ) {
             get_template_directory_uri() . '/assets/css/admin.css',
             [],
             TAMGACI_VERSION
+        );
+
+        wp_enqueue_script(
+            'tamgaci-admin',
+            get_template_directory_uri() . '/assets/js/admin.js',
+            [ 'jquery' ],
+            TAMGACI_VERSION,
+            true
         );
     }
 } );
