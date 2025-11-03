@@ -94,8 +94,9 @@ class Tamgaci_GitHub_Updater {
     /**
      * Fix the update folder name
      *
-     * GitHub zipballs extract to a folder like "username-reponame-commit"
-     * We need to rename it to just the theme slug
+     * Our custom ZIP already has the correct structure (tamgaci/...)
+     * But GitHub's automatic zipball has format "username-reponame-commit"
+     * We only need to fix GitHub zipballs, not our custom release ZIPs
      */
     public function fix_update_folder( $source, $remote_source, $upgrader ) {
         global $wp_filesystem;
@@ -110,10 +111,15 @@ class Tamgaci_GitHub_Updater {
             return $source;
         }
 
+        // Check if source already has correct name (our custom ZIP)
+        if ( basename( $source ) === $this->theme_slug ) {
+            return $source;
+        }
+
         // Get the correct destination
         $destination = trailingslashit( $remote_source ) . $this->theme_slug;
 
-        // Rename the folder
+        // Rename the folder (for GitHub zipballs)
         if ( $wp_filesystem->move( $source, $destination ) ) {
             return $destination;
         }

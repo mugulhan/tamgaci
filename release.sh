@@ -178,24 +178,35 @@ print_success "Created git tag"
 print_info "Creating deployment ZIP..."
 ZIP_NAME="${THEME_NAME}-v${NEW_VERSION}.zip"
 ZIP_PATH="$THEME_DIR/$ZIP_NAME"
+TEMP_DIR=$(mktemp -d)
+TEMP_THEME_DIR="$TEMP_DIR/$THEME_NAME"
 
 # Remove old ZIP if exists
 rm -f "$ZIP_PATH"
 
-# Create ZIP excluding unnecessary files
-cd "$THEME_DIR"
-zip -r "$ZIP_NAME" . \
-    -x "*.git*" \
-    -x "*node_modules*" \
-    -x "*.DS_Store" \
-    -x "*src/*" \
-    -x "*release.sh" \
-    -x "*.zip" \
-    -x "*package.json" \
-    -x "*package-lock.json" \
-    -x "*tailwind.config.js" \
-    -x "*postcss.config.js" \
-    > /dev/null 2>&1
+# Create temporary directory with theme name
+mkdir -p "$TEMP_THEME_DIR"
+
+# Copy theme files to temp directory excluding unnecessary files
+rsync -a "$THEME_DIR/" "$TEMP_THEME_DIR/" \
+    --exclude='.git' \
+    --exclude='.gitignore' \
+    --exclude='node_modules' \
+    --exclude='.DS_Store' \
+    --exclude='src' \
+    --exclude='release.sh' \
+    --exclude='*.zip' \
+    --exclude='package.json' \
+    --exclude='package-lock.json' \
+    --exclude='tailwind.config.js' \
+    --exclude='postcss.config.js'
+
+# Create ZIP from parent directory so it includes the theme folder
+cd "$TEMP_DIR"
+zip -r "$ZIP_PATH" "$THEME_NAME" > /dev/null 2>&1
+
+# Clean up temp directory
+rm -rf "$TEMP_DIR"
 
 print_success "Created deployment ZIP: $ZIP_NAME"
 
