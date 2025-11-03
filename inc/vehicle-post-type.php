@@ -2868,3 +2868,202 @@ function tamgaci_comparison_built_notice() {
     );
 }
 add_action( 'admin_notices', 'tamgaci_comparison_built_notice' );
+
+/**
+ * Add admin submenu page for updating comparison titles
+ */
+function tamgaci_add_comparison_tools_menu() {
+	add_submenu_page(
+		'edit.php?post_type=vehicle_comparison',
+		__( 'Başlıkları Güncelle', 'tamgaci' ),
+		__( 'Başlıkları Güncelle', 'tamgaci' ),
+		'manage_options',
+		'tamgaci-update-comparison-titles',
+		'tamgaci_render_update_comparison_titles_page'
+	);
+}
+add_action( 'admin_menu', 'tamgaci_add_comparison_tools_menu' );
+
+/**
+ * Render the update comparison titles admin page
+ */
+function tamgaci_render_update_comparison_titles_page() {
+	// Security check
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( __( 'Unauthorized access.', 'tamgaci' ) );
+	}
+
+	// Handle update action
+	$do_update = isset( $_POST['tamgaci_update_titles_nonce'] ) && wp_verify_nonce( $_POST['tamgaci_update_titles_nonce'], 'tamgaci_update_comparison_titles' );
+
+	?>
+	<div class="wrap">
+		<h1><?php esc_html_e( 'Karşılaştırma Başlıklarını Güncelle', 'tamgaci' ); ?></h1>
+
+		<div class="notice notice-info">
+			<p>
+				<strong><?php esc_html_e( 'Amaç:', 'tamgaci' ); ?></strong>
+				<?php esc_html_e( 'Bu araç, tekrar eden donanım isimlerini düzeltmek için tüm karşılaştırma başlıklarını yeniden oluşturur (v0.11.2 düzeltmesi).', 'tamgaci' ); ?>
+			</p>
+		</div>
+
+		<?php
+		// Get all comparison posts
+		$args = array(
+			'post_type'      => 'vehicle_comparison',
+			'posts_per_page' => -1,
+			'post_status'    => 'publish',
+		);
+
+		$comparisons = get_posts( $args );
+
+		if ( empty( $comparisons ) ) {
+			echo '<div class="notice notice-warning"><p>' . esc_html__( 'Karşılaştırma bulunamadı.', 'tamgaci' ) . '</p></div>';
+		} else {
+			$total_count     = count( $comparisons );
+			$updated_count   = 0;
+			$unchanged_count = 0;
+			$error_count     = 0;
+			$updates         = array();
+
+			foreach ( $comparisons as $post ) {
+				$vehicle_ids = get_post_meta( $post->ID, 'tamgaci_comparison_vehicles', true );
+
+				if ( empty( $vehicle_ids ) || ! is_array( $vehicle_ids ) ) {
+					$error_count++;
+					continue;
+				}
+
+				// Generate new title using the fixed function
+				$vehicle_titles = array_map( 'tamgaci_get_vehicle_display_title', $vehicle_ids );
+				$new_title      = trim( implode( ' vs ', array_filter( $vehicle_titles ) ) );
+
+				$old_title = $post->post_title;
+
+				if ( $old_title !== $new_title ) {
+					$updates[] = array(
+						'id'  => $post->ID,
+						'old' => $old_title,
+						'new' => $new_title,
+						'url' => get_permalink( $post->ID ),
+					);
+
+					// Update if confirmed
+					if ( $do_update ) {
+						$result = wp_update_post(
+							array(
+								'ID'         => $post->ID,
+								'post_title' => $new_title,
+							)
+						);
+
+						if ( is_wp_error( $result ) ) {
+							$error_count++;
+						} else {
+							$updated_count++;
+						}
+					}
+				} else {
+					$unchanged_count++;
+				}
+			}
+
+			// Display stats
+			?>
+			<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0;">
+				<div style="background: #f6f7f7; padding: 15px; border-radius: 4px; text-align: center;">
+					<div style="font-size: 32px; font-weight: bold; color: #2271b1;"><?php echo esc_html( $total_count ); ?></div>
+					<div style="color: #50575e; font-size: 14px;"><?php esc_html_e( 'Toplam Karşılaştırma', 'tamgaci' ); ?></div>
+				</div>
+
+				<div style="background: #f6f7f7; padding: 15px; border-radius: 4px; text-align: center;">
+					<div style="font-size: 32px; font-weight: bold; color: #2271b1;"><?php echo esc_html( count( $updates ) ); ?></div>
+					<div style="color: #50575e; font-size: 14px;"><?php esc_html_e( 'Güncellenmeli', 'tamgaci' ); ?></div>
+				</div>
+
+				<?php if ( $do_update ) : ?>
+					<div style="background: #f6f7f7; padding: 15px; border-radius: 4px; text-align: center;">
+						<div style="font-size: 32px; font-weight: bold; color: #00a32a;"><?php echo esc_html( $updated_count ); ?></div>
+						<div style="color: #50575e; font-size: 14px;"><?php esc_html_e( 'Güncellendi', 'tamgaci' ); ?></div>
+					</div>
+
+					<div style="background: #f6f7f7; padding: 15px; border-radius: 4px; text-align: center;">
+						<div style="font-size: 32px; font-weight: bold; color: #2271b1;"><?php echo esc_html( $unchanged_count ); ?></div>
+						<div style="color: #50575e; font-size: 14px;"><?php esc_html_e( 'Zaten Doğru', 'tamgaci' ); ?></div>
+					</div>
+
+					<?php if ( $error_count > 0 ) : ?>
+						<div style="background: #f6f7f7; padding: 15px; border-radius: 4px; text-align: center;">
+							<div style="font-size: 32px; font-weight: bold; color: #d63638;"><?php echo esc_html( $error_count ); ?></div>
+							<div style="color: #50575e; font-size: 14px;"><?php esc_html_e( 'Hata', 'tamgaci' ); ?></div>
+						</div>
+					<?php endif; ?>
+				<?php endif; ?>
+			</div>
+
+			<?php
+			// Display results
+			if ( $do_update ) {
+				if ( $updated_count > 0 ) {
+					echo '<div class="notice notice-success"><p>✅ ' . sprintf( esc_html__( '%d karşılaştırma başlığı başarıyla güncellendi!', 'tamgaci' ), $updated_count ) . '</p></div>';
+				}
+				if ( $unchanged_count > 0 ) {
+					echo '<div class="notice notice-info"><p>ℹ️ ' . sprintf( esc_html__( '%d karşılaştırma zaten doğru başlığa sahipti.', 'tamgaci' ), $unchanged_count ) . '</p></div>';
+				}
+				if ( $error_count > 0 ) {
+					echo '<div class="notice notice-error"><p>❌ ' . sprintf( esc_html__( '%d karşılaştırmada hata oluştu.', 'tamgaci' ), $error_count ) . '</p></div>';
+				}
+
+				echo '<p><a href="' . esc_url( admin_url( 'edit.php?post_type=vehicle_comparison' ) ) . '" class="button button-primary">' . esc_html__( 'Tüm Karşılaştırmaları Görüntüle', 'tamgaci' ) . '</a></p>';
+			} else {
+				// Show preview of changes
+				if ( ! empty( $updates ) ) {
+					?>
+					<h2><?php echo sprintf( esc_html__( 'Değişikliklerin Önizlemesi (%d gönderi güncellenecek)', 'tamgaci' ), count( $updates ) ); ?></h2>
+
+					<table class="wp-list-table widefat fixed striped">
+						<thead>
+							<tr>
+								<th style="width: 80px;"><?php esc_html_e( 'ID', 'tamgaci' ); ?></th>
+								<th><?php esc_html_e( 'Eski Başlık', 'tamgaci' ); ?></th>
+								<th><?php esc_html_e( 'Yeni Başlık', 'tamgaci' ); ?></th>
+								<th style="width: 100px;"><?php esc_html_e( 'Link', 'tamgaci' ); ?></th>
+							</tr>
+						</thead>
+						<tbody>
+							<?php foreach ( array_slice( $updates, 0, 20 ) as $update ) : ?>
+								<tr>
+									<td><?php echo esc_html( $update['id'] ); ?></td>
+									<td><span style="color: #d63638; text-decoration: line-through;"><?php echo esc_html( $update['old'] ); ?></span></td>
+									<td><strong style="color: #00a32a;"><?php echo esc_html( $update['new'] ); ?></strong></td>
+									<td><a href="<?php echo esc_url( $update['url'] ); ?>" target="_blank"><?php esc_html_e( 'Görüntüle', 'tamgaci' ); ?></a></td>
+								</tr>
+							<?php endforeach; ?>
+						</tbody>
+					</table>
+
+					<?php if ( count( $updates ) > 20 ) : ?>
+						<p><em><?php echo sprintf( esc_html__( 'İlk 20 tanesi gösteriliyor (toplam %d değişiklik)...', 'tamgaci' ), count( $updates ) ); ?></em></p>
+					<?php endif; ?>
+
+					<div class="notice notice-warning">
+						<p><strong>⚠️ <?php esc_html_e( 'Uyarı:', 'tamgaci' ); ?></strong> <?php echo sprintf( esc_html__( 'Bu işlem %d karşılaştırma gönderisinin başlığını veritabanında güncelleyecek.', 'tamgaci' ), count( $updates ) ); ?></p>
+					</div>
+
+					<form method="post" onsubmit="return confirm('<?php echo esc_js( sprintf( __( '%d karşılaştırma başlığını güncellemek istediğinizden emin misiniz?', 'tamgaci' ), count( $updates ) ) ); ?>');">
+						<?php wp_nonce_field( 'tamgaci_update_comparison_titles', 'tamgaci_update_titles_nonce' ); ?>
+						<p>
+							<button type="submit" class="button button-primary">✅ <?php esc_html_e( 'Onayla ve Tüm Başlıkları Güncelle', 'tamgaci' ); ?></button>
+							<a href="<?php echo esc_url( admin_url() ); ?>" class="button"><?php esc_html_e( 'İptal', 'tamgaci' ); ?></a>
+						</p>
+					</form>
+					<?php
+				} else {
+					echo '<div class="notice notice-success"><p>✅ ' . esc_html__( 'Tüm karşılaştırma başlıkları zaten doğru! Güncelleme gerekmez.', 'tamgaci' ) . '</p></div>';
+				}
+			}
+		}
+		?>
+	</div>
+	<?php
+}
