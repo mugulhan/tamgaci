@@ -2940,6 +2940,17 @@ function tamgaci_render_update_comparison_titles_page() {
 
 				$old_title = $post->post_title;
 
+				// Debug: Check first 3 comparisons
+				if ( count( $updates ) + $unchanged_count < 3 && ! $do_update ) {
+					error_log( sprintf(
+						'Comparison ID %d: Old="%s" New="%s" Equal=%s',
+						$post->ID,
+						$old_title,
+						$new_title,
+						$old_title === $new_title ? 'YES' : 'NO'
+					) );
+				}
+
 				if ( $old_title !== $new_title ) {
 					$updates[] = array(
 						'id'  => $post->ID,
@@ -3060,6 +3071,35 @@ function tamgaci_render_update_comparison_titles_page() {
 					<?php
 				} else {
 					echo '<div class="notice notice-success"><p>✅ ' . esc_html__( 'Tüm karşılaştırma başlıkları zaten doğru! Güncelleme gerekmez.', 'tamgaci' ) . '</p></div>';
+
+					// Debug: Show sample comparison for troubleshooting
+					if ( ! empty( $comparisons ) && count( $comparisons ) > 0 ) {
+						$sample = $comparisons[0];
+						$sample_vehicle_ids = get_post_meta( $sample->ID, 'tamgaci_comparison_vehicles', true );
+						if ( ! empty( $sample_vehicle_ids ) && is_array( $sample_vehicle_ids ) ) {
+							$sample_titles = array_map( 'tamgaci_get_vehicle_display_title', $sample_vehicle_ids );
+							$sample_new = trim( implode( ' vs ', array_filter( $sample_titles ) ) );
+							?>
+							<div class="notice notice-info">
+								<p><strong>Debug Bilgisi (İlk Karşılaştırma):</strong></p>
+								<ul style="margin: 10px 0; padding-left: 20px;">
+									<li><strong>ID:</strong> <?php echo esc_html( $sample->ID ); ?></li>
+									<li><strong>Veritabanındaki Başlık:</strong> <code><?php echo esc_html( $sample->post_title ); ?></code></li>
+									<li><strong>Fonksiyonun Ürettiği Başlık:</strong> <code><?php echo esc_html( $sample_new ); ?></code></li>
+									<li><strong>Eşit mi?:</strong> <?php echo $sample->post_title === $sample_new ? '✅ Evet' : '❌ Hayır'; ?></li>
+									<li><strong>Araç ID'leri:</strong> <?php echo esc_html( implode( ', ', $sample_vehicle_ids ) ); ?></li>
+									<li><strong>Araç Başlıkları:</strong>
+										<ul style="margin: 5px 0; padding-left: 20px;">
+											<?php foreach ( $sample_vehicle_ids as $vid ) : ?>
+												<li><?php echo esc_html( tamgaci_get_vehicle_display_title( $vid ) ); ?> (ID: <?php echo esc_html( $vid ); ?>)</li>
+											<?php endforeach; ?>
+										</ul>
+									</li>
+								</ul>
+							</div>
+							<?php
+						}
+					}
 				}
 			}
 		}
