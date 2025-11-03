@@ -1328,7 +1328,7 @@ function tamgaci_get_vehicle_meta_snapshot( $vehicle_id ) {
 
     return [
         'id'         => $vehicle_id,
-        'title'      => tamgaci_get_vehicle_display_title( $vehicle_id ),
+        'title'      => get_the_title( $vehicle_id ),
         'permalink'  => get_permalink( $vehicle_id ),
         'price'      => $data['price'] ?? '',
         'powertrain' => implode( ' / ', $data['powertrain'] ?? [] ),
@@ -1354,39 +1354,6 @@ function tamgaci_get_vehicle_price_value( $vehicle_id ) {
     }
 
     return (float) $normalized;
-}
-
-function tamgaci_get_vehicle_display_title( $vehicle_id ) {
-    $brand_term = tamgaci_get_primary_term( $vehicle_id, 'vehicle_brand' );
-    $detail     = get_post_meta( $vehicle_id, 'tamgaci_vehicle_equipment', true );
-
-    $parts = [];
-
-    // Get brand, model, and equipment from hierarchical brand taxonomy
-    if ( $brand_term ) {
-        $hierarchy = [];
-        $current   = $brand_term;
-
-        // Build hierarchy from current term to root
-        while ( $current && ! is_wp_error( $current ) ) {
-            array_unshift( $hierarchy, $current->name );
-            if ( $current->parent > 0 ) {
-                $current = get_term( $current->parent, 'vehicle_brand' );
-            } else {
-                break;
-            }
-        }
-
-        // Add all hierarchy parts (Brand > Model > Equipment)
-        $parts = array_merge( $parts, $hierarchy );
-    }
-
-    // Don't add custom equipment detail to title to avoid duplication
-    // Equipment info should only come from taxonomy hierarchy
-
-    $title = trim( preg_replace( '/\s+/', ' ', implode( ' ', array_filter( $parts ) ) ) );
-
-    return $title ?: get_the_title( $vehicle_id );
 }
 
 function tamgaci_get_vehicle_profile_signature( $vehicle_id ) {
@@ -1467,12 +1434,13 @@ function tamgaci_create_vehicle_comparison_post( $vehicle_ids ) {
 
     $key = tamgaci_generate_comparison_key( $vehicle_ids );
 
-    $vehicle_titles = array_map( 'tamgaci_get_vehicle_display_title', $vehicle_ids );
+    // Use actual vehicle post titles instead of generated titles
+    $vehicle_titles = array_map( 'get_the_title', $vehicle_ids );
 
     $slug_seed = [];
 
     foreach ( $vehicle_ids as $seed_vehicle_id ) {
-        $seed_title = sanitize_title( tamgaci_get_vehicle_display_title( $seed_vehicle_id ) );
+        $seed_title = sanitize_title( get_the_title( $seed_vehicle_id ) );
         $segments   = array_slice( explode( '-', $seed_title ), 0, 2 );
         $slug_seed[] = implode( '-', array_filter( $segments ) );
     }
@@ -2934,8 +2902,8 @@ function tamgaci_render_update_comparison_titles_page() {
 					continue;
 				}
 
-				// Generate new title using the fixed function
-				$vehicle_titles = array_map( 'tamgaci_get_vehicle_display_title', $vehicle_ids );
+				// Generate new title using actual vehicle post titles
+				$vehicle_titles = array_map( 'get_the_title', $vehicle_ids );
 				$new_title      = trim( implode( ' vs ', array_filter( $vehicle_titles ) ) );
 
 				$old_title = $post->post_title;
@@ -3077,21 +3045,21 @@ function tamgaci_render_update_comparison_titles_page() {
 						$sample = $comparisons[0];
 						$sample_vehicle_ids = get_post_meta( $sample->ID, 'tamgaci_comparison_vehicles', true );
 						if ( ! empty( $sample_vehicle_ids ) && is_array( $sample_vehicle_ids ) ) {
-							$sample_titles = array_map( 'tamgaci_get_vehicle_display_title', $sample_vehicle_ids );
+							$sample_titles = array_map( 'get_the_title', $sample_vehicle_ids );
 							$sample_new = trim( implode( ' vs ', array_filter( $sample_titles ) ) );
 							?>
 							<div class="notice notice-info">
 								<p><strong>Debug Bilgisi (İlk Karşılaştırma):</strong></p>
 								<ul style="margin: 10px 0; padding-left: 20px;">
 									<li><strong>ID:</strong> <?php echo esc_html( $sample->ID ); ?></li>
-									<li><strong>Veritabanındaki Başlık:</strong> <code><?php echo esc_html( $sample->post_title ); ?></code></li>
-									<li><strong>Fonksiyonun Ürettiği Başlık:</strong> <code><?php echo esc_html( $sample_new ); ?></code></li>
+									<li><strong>Veritabanındaki Karşılaştırma Başlığı:</strong> <code><?php echo esc_html( $sample->post_title ); ?></code></li>
+									<li><strong>Araç Başlıklarından Oluşan Yeni Başlık:</strong> <code><?php echo esc_html( $sample_new ); ?></code></li>
 									<li><strong>Eşit mi?:</strong> <?php echo $sample->post_title === $sample_new ? '✅ Evet' : '❌ Hayır'; ?></li>
 									<li><strong>Araç ID'leri:</strong> <?php echo esc_html( implode( ', ', $sample_vehicle_ids ) ); ?></li>
-									<li><strong>Araç Başlıkları:</strong>
+									<li><strong>Araç Post Başlıkları:</strong>
 										<ul style="margin: 5px 0; padding-left: 20px;">
 											<?php foreach ( $sample_vehicle_ids as $vid ) : ?>
-												<li><?php echo esc_html( tamgaci_get_vehicle_display_title( $vid ) ); ?> (ID: <?php echo esc_html( $vid ); ?>)</li>
+												<li><?php echo esc_html( get_the_title( $vid ) ); ?> (ID: <?php echo esc_html( $vid ); ?>)</li>
 											<?php endforeach; ?>
 										</ul>
 									</li>
