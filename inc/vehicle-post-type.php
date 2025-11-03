@@ -1381,10 +1381,8 @@ function tamgaci_get_vehicle_display_title( $vehicle_id ) {
         $parts = array_merge( $parts, $hierarchy );
     }
 
-    // Add custom equipment detail if exists
-    if ( $detail ) {
-        $parts[] = $detail;
-    }
+    // Don't add custom equipment detail to title to avoid duplication
+    // Equipment info should only come from taxonomy hierarchy
 
     $title = trim( preg_replace( '/\s+/', ' ', implode( ' ', array_filter( $parts ) ) ) );
 
