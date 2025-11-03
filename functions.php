@@ -3,12 +3,13 @@
  * Tamgaci theme bootstrap.
  */
 
-define( 'TAMGACI_VERSION', '0.10.11' );
+define( 'TAMGACI_VERSION', '0.11.0' );
 define( 'TAMGACI_THEME_PATH', __DIR__ );
 
 require_once TAMGACI_THEME_PATH . '/inc/vehicle-post-type.php';
 require_once TAMGACI_THEME_PATH . '/inc/theme-updater.php';
 require_once TAMGACI_THEME_PATH . '/inc/sitemap.php';
+require_once TAMGACI_THEME_PATH . '/inc/theme-settings.php';
 
 // Disable WordPress default sitemap
 add_filter( 'wp_sitemaps_enabled', '__return_false' );
@@ -119,6 +120,11 @@ add_action( 'admin_enqueue_scripts', function ( $hook ) {
             TAMGACI_VERSION,
             true
         );
+
+        wp_localize_script( 'tamgaci-admin', 'tamgaciAdmin', [
+            'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+            'nonce'   => wp_create_nonce( 'tamgaci-admin' ),
+        ] );
     }
 } );
 

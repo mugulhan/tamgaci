@@ -857,6 +857,82 @@ function tamgaci_render_vehicle_meta_box( $post ) {
     $post_type = get_post_type( $post );
     $schema    = tamgaci_vehicle_meta_schema( $post_type );
 
+    // Gemini AI Auto-fill section
+    $api_key = get_option( 'tamgaci_gemini_api_key', '' );
+    ?>
+    <div class="tamgaci-gemini-autofill" style="background: #f0f6fc; border: 1px solid #0969da; border-radius: 6px; padding: 15px; margin-bottom: 20px;">
+        <h4 style="margin-top: 0; color: #0969da;">
+            <span class="dashicons dashicons-superhero" style="vertical-align: middle;"></span>
+            <?php _e( 'AI ile Otomatik Doldur', 'tamgaci' ); ?>
+        </h4>
+
+        <?php if ( empty( $api_key ) ) : ?>
+            <p style="color: #d1242f;">
+                <?php
+                printf(
+                    __( 'Gemini API key tanımlanmamış. Lütfen <a href="%s">Ayarlar</a> sayfasından API key ekleyin.', 'tamgaci' ),
+                    admin_url( 'options-general.php?page=tamgaci-settings' )
+                );
+                ?>
+            </p>
+        <?php else : ?>
+            <p style="margin: 0 0 10px 0;">
+                <?php _e( 'Aracın teknik özelliklerini metin olarak veya görsel yükleyerek AI ile analiz edin.', 'tamgaci' ); ?>
+            </p>
+
+            <!-- Tabs for Text vs Image -->
+            <div style="margin-bottom: 10px;">
+                <button type="button" class="button" id="tamgaci-tab-text" style="margin-right: 5px; background: #0969da; color: white; border-color: #0969da;">
+                    <span class="dashicons dashicons-text" style="vertical-align: middle;"></span>
+                    <?php _e( 'Metin', 'tamgaci' ); ?>
+                </button>
+                <button type="button" class="button" id="tamgaci-tab-image" style="background: white; color: #0969da;">
+                    <span class="dashicons dashicons-camera" style="vertical-align: middle;"></span>
+                    <?php _e( 'Görsel', 'tamgaci' ); ?>
+                </button>
+            </div>
+
+            <!-- Text input panel -->
+            <div id="tamgaci-panel-text">
+                <textarea
+                    id="tamgaci-gemini-input"
+                    rows="6"
+                    style="width: 100%; font-family: monospace; font-size: 13px; padding: 8px;"
+                    placeholder="<?php esc_attr_e( 'Örnek:\nVolkswagen Golf 1.5 TSI 2024\nMotor Gücü: 110 kW / 150 PS\nSilindir Hacmi: 1498 cc\nYakıt Tipi: Benzin\nŞehir İçi Tüketim: 6.5 L/100km\n...', 'tamgaci' ); ?>"
+                ></textarea>
+            </div>
+
+            <!-- Image paste panel -->
+            <div id="tamgaci-panel-image" style="display: none;">
+                <div id="tamgaci-paste-area"
+                     contenteditable="true"
+                     style="border: 2px dashed #0969da; border-radius: 6px; padding: 40px 20px; text-align: center; background: white; min-height: 200px; cursor: text; outline: none; position: relative;"
+                     tabindex="0">
+                    <div id="tamgaci-paste-placeholder" style="pointer-events: none; color: #666;">
+                        <span class="dashicons dashicons-images-alt2" style="font-size: 48px; width: 48px; height: 48px; color: #0969da;"></span>
+                        <br><br>
+                        <?php _e( 'Görseli buraya yapıştırın (Ctrl+V / Cmd+V)', 'tamgaci' ); ?>
+                        <br>
+                        <span style="font-size: 12px;"><?php _e( 'Ekran görüntüsü, kopyalanmış görsel veya dosyadan yapıştırma', 'tamgaci' ); ?></span>
+                    </div>
+                    <div id="tamgaci-image-preview"></div>
+                </div>
+                <p style="margin-top: 10px; font-size: 12px; color: #666;">
+                    <?php _e( 'Tüm görsel formatları desteklenir. Maksimum boyut: 4MB', 'tamgaci' ); ?>
+                </p>
+            </div>
+
+            <p style="margin: 10px 0 0 0;">
+                <button type="button" id="tamgaci-gemini-autofill-btn" class="button button-primary button-large">
+                    <span class="dashicons dashicons-superhero" style="vertical-align: middle;"></span>
+                    <?php _e( 'AI ile Doldur', 'tamgaci' ); ?>
+                </button>
+                <span id="tamgaci-gemini-status" style="margin-left: 10px;"></span>
+            </p>
+        <?php endif; ?>
+    </div>
+    <?php
+
     echo '<div class="tamgaci-meta-grid">';
 
     foreach ( $schema as $key => $config ) {
