@@ -18,6 +18,7 @@ class Tamgaci_GitHub_Updater {
 
         add_filter( 'pre_set_site_transient_update_themes', array( $this, 'check_update' ) );
         add_filter( 'upgrader_source_selection', array( $this, 'fix_update_folder' ), 10, 3 );
+        add_filter( 'upgrader_pre_install', array( $this, 'prepare_update' ), 10, 2 );
     }
 
     /**
@@ -89,6 +90,36 @@ class Tamgaci_GitHub_Updater {
         }
 
         return $transient;
+    }
+
+    /**
+     * Prepare for theme update
+     *
+     * Remove the old theme directory before installing the new one
+     * This prevents backup folder errors
+     */
+    public function prepare_update( $response, $hook_extra ) {
+        global $wp_filesystem;
+
+        // Only process theme updates
+        if ( ! isset( $hook_extra['theme'] ) ) {
+            return $response;
+        }
+
+        // Only process our theme
+        if ( $hook_extra['theme'] !== $this->theme_slug ) {
+            return $response;
+        }
+
+        // Get theme directory
+        $theme_dir = get_theme_root() . '/' . $this->theme_slug;
+
+        // Remove old theme directory
+        if ( $wp_filesystem->exists( $theme_dir ) ) {
+            $wp_filesystem->delete( $theme_dir, true );
+        }
+
+        return $response;
     }
 
     /**
